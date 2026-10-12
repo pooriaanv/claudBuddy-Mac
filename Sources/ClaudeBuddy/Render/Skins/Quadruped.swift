@@ -20,9 +20,15 @@ struct QuadrupedRig {
     /// 0...1: front legs stretched forward (yawn stretch).
     let stretch: Double
     let hip: CGPoint
+    /// Hopping gait (bunnies): front feet together, hind feet together, body bouncing.
+    let hops: Bool
+    /// Vertical bounce of the whole body while hopping (negative = up).
+    let hop: CGFloat
 
-    init(_ p: Pose) {
+    init(_ p: Pose, hops: Bool = false) {
         pose = p
+        self.hops = hops
+        hop = hops && p.stepPhase != nil && !p.airborne ? -CGFloat(abs(sin((p.stepPhase ?? 0) / 2))) * 14 : 0
         // theta, drop, haunch, tuck, stretch
         func params(_ s: Posture) -> [Double] {
             switch s {
@@ -41,7 +47,7 @@ struct QuadrupedRig {
         haunch = v[2]
         tuck = v[3]
         stretch = v[4]
-        hip = pt(52, 236 + drop)
+        hip = pt(52, 236 + drop + hop)
     }
 
     /// A point given relative to the hip along the body axis, in character space.
@@ -68,7 +74,8 @@ struct QuadrupedRig {
         let a = attach(front: front, near: near)
         let p = pose
         // diagonal pairs move together, like a real walk
-        let phase = (p.stepPhase ?? 0) + (front == near ? 0 : .pi)
+        let pairOffset: Double = hops ? (front ? 0 : .pi) : (front == near ? 0 : .pi)
+        let phase = (p.stepPhase ?? 0) + pairOffset
         let raise = front ? CGFloat(pawRaise(near: near)) : 0
 
         if p.airborne || Self.floor - a.y > (front ? 82 : 44) {
@@ -81,7 +88,7 @@ struct QuadrupedRig {
             lift = CGFloat(max(0, cos(phase))) * 7
         }
         if front { dx += CGFloat(stretch) * 22 }
-        var f = pt(a.x + dx, Self.floor - 5 - lift)
+        var f = pt(a.x + dx, Self.floor - 5 - lift + hop)
         if raise > 0 {
             let wave = CGFloat(sin(p.t * 14)) * 6 * raise
             f = pt(f.x + raise * 18, f.y - raise * (f.y - a.y + 14) + wave)
@@ -103,6 +110,8 @@ protocol QuadrupedSkin: Skin {
     var wagAmount: Double { get }
     /// Tail curls around the front paws (in front of the body) when sitting or lying.
     var wrapsTail: Bool { get }
+    /// Hops instead of walking.
+    var hops: Bool { get }
     /// Tail control point 1, control point 2 and tip, relative to the rump.
     func tailShape(_ posture: Posture) -> [CGPoint]
     /// Drawn in body space (rotated with the body), using `rig.hip` as the origin.
@@ -136,6 +145,7 @@ extension QuadrupedSkin {
     }
 
     var wrapsTail: Bool { false }
+    var hops: Bool { false }
 
     func drawNeck(_ g: GraphicsContext, _ rig: QuadrupedRig) {}
     func drawFrontNeck(_ g: GraphicsContext) {}
@@ -175,7 +185,7 @@ extension QuadrupedSkin {
     /// Where the side view puts the head. The head itself is never mirrored (it faces you), only its position follows
     /// the body as it turns around.
     private func sideHead(_ p: Pose) -> HeadPlacement {
-        let c = QuadrupedRig(p).headCenter
+        let c = QuadrupedRig(p, hops: hops).headCenter
         return (pt(100 + (c.x - 100) * CGFloat(p.facing), c.y), 0.74, CGFloat(p.turn + 0.25 * p.facing) * 8)
     }
 
@@ -235,7 +245,7 @@ extension QuadrupedSkin {
         g.translateBy(x: 100, y: 0)
         g.scaleBy(x: flip, y: 1)
         g.translateBy(x: -100, y: 0)
-        let rig = QuadrupedRig(p)
+        let rig = QuadrupedRig(p, hops: hops)
         let legsVisible = rig.tuck < 0.5
         let sitting = rig.haunch > 0.5
         let tailInFront = wrapsTail && (p.posture == .sit || p.posture == .lie) && p.postureBlend > 0.5

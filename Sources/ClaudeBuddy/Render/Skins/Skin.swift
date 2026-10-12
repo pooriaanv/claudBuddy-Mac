@@ -36,6 +36,8 @@ enum SkinCatalog {
         case .kitty: return KittySkin()
         case .puppy: return PuppySkin()
         case .robo: return RoboSkin()
+        case .bunny: return BunnySkin()
+        case .ninja: return NinjaSkin()
         }
     }
 }

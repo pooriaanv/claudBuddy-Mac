@@ -17,14 +17,16 @@ public enum Posture: Equatable, CaseIterable {
 
 /// The available characters. Each has a matching skin in the app's `Render/Skins` folder.
 public enum SkinID: String, CaseIterable, Identifiable {
-    case buddy, kitty, puppy, robo
+    case buddy, kitty, puppy, bunny, robo, ninja
     public var id: String { rawValue }
     public var nameKey: L10nKey {
         switch self {
         case .buddy: return .skinBuddy
         case .kitty: return .skinKitty
         case .puppy: return .skinPuppy
+        case .bunny: return .skinBunny
         case .robo: return .skinRobo
+        case .ninja: return .skinNinja
         }
     }
 }

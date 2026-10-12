@@ -2,6 +2,12 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.7
+
+- Two new characters: **Bunny** (four legs, hops instead of walking, floppy ears when sleepy) and **Ninja**
+  (red headband with fluttering tails, katana on its back — it draws the sword when it dances)
+- The knocking buddy is 20% smaller on screen
+
 ## 0.0.6
 
 - Fix: with "Don't knock if I'm already in the Claude / Codex app" on, a **minimized** Claude window still counted

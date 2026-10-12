@@ -4,7 +4,7 @@ A cute macOS desktop pet that lives on your wallpaper. It nods, blinks, wanders 
 away, and — when an AI coding agent (Claude Code, Codex, or anything else) finishes or needs permission —
 jumps up to the "glass" and knocks until you come back.
 
-- **Characters:** Buddy (little guy), Robo, and Kitty & Puppy — real four-legged animals that walk on diagonal
+- **Characters:** Buddy (little guy), Robo, Ninja, and Kitty, Puppy & Bunny — real four-legged animals that walk on diagonal
   leg pairs, sit, stretch, curl up to sleep and rear up on their hind legs to paw at the glass. Pick one in Settings.
 - **Mischief:** Calm (sits, looks around), Playful (walks, dances, jumps), Naughty (all that + chases your cursor).
 - **Pet it:** click for hearts; drag it around (it dangles) and drop it — it falls back to the floor.

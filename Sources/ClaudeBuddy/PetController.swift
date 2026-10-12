@@ -329,7 +329,7 @@ final class PetController {
         let mouse = NSEvent.mouseLocation
         let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main ?? NSScreen.screens[0]
         let vf = screen.visibleFrame
-        let h = min(vf.height * 0.82, 720)
+        let h = min(vf.height * 0.66, 576)
         let w = h * SceneRenderer.design.width / SceneRenderer.design.height
         return NSRect(x: vf.midX - w / 2, y: vf.midY - h / 2, width: w, height: h)
     }

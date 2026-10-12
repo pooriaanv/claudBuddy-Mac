@@ -11,7 +11,7 @@ public enum L10nKey: String, CaseIterable {
     case menuSettings, menuTestKnock, menuSendHome, menuMute, menuQuit
     // settings
     case settingsTitle, sectionCharacter, sectionBehavior, sectionLanguage, sectionAgents
-    case skinBuddy, skinKitty, skinPuppy, skinRobo
+    case skinBuddy, skinKitty, skinPuppy, skinRobo, skinBunny, skinNinja
     case mischief, mischiefCalm, mischiefPlayful, mischiefNaughty, mischiefHint
     case size, sound, testKnock, launchAtLogin, languageSystem, quietWhenWatching, quietHint, menuWaiting
     case connected, notConnected, connect, disconnect, toolNotFound, codexTrustHint, otherAgentsHint
@@ -103,6 +103,8 @@ public struct L10n {
         .skinKitty: ("Kitty", "گربه"),
         .skinPuppy: ("Puppy", "توله‌سگ"),
         .skinRobo: ("Robo", "ربات"),
+        .skinBunny: ("Bunny", "خرگوش"),
+        .skinNinja: ("Ninja", "نینجا"),
         .mischief: ("Mischief", "شیطونی"),
         .mischiefCalm: ("Calm", "آروم"),
         .mischiefPlayful: ("Playful", "بازیگوش"),
