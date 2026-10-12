@@ -119,76 +119,38 @@ struct NinjaSkin: Skin {
     }
 
     /// Narrow, angled, glowing slits — they get brighter and pulse when it's on alert.
-    /// Hooded blades: the mask cuts the top of each eye in a straight, down-sloping line, so the glow only spills
-    /// below — a glare from under the hood. Long sharp outer tip, curved underside, a hook at the inner corner,
-    /// white-hot core, faint glow on the mask.
-    private func drawEyes(_ h: GraphicsContext, _ p: Pose, tx: CGFloat) {
+    // MARK: eyes
+
+    private func eyeState(_ p: Pose) -> (open: CGFloat, strength: Double, alert: Bool) {
         let open: CGFloat
         switch p.mood {
-        case .sleepy: open = max(0.16, CGFloat(p.eyeOpen))
+        case .sleepy: open = max(0.15, CGFloat(p.eyeOpen))
         case .surprised: open = 1.3
         case .happy: open = 0.55
-        default: open = max(0.14, CGFloat(p.eyeOpen))
+        default: open = max(0.12, CGFloat(p.eyeOpen))
         }
         let alert = p.mood == .excited
         let pulse = alert ? 0.8 + 0.2 * sin(p.t * 10) : 1
-        let strength = (p.mood == .sleepy ? 0.4 : 1) * pulse
-        let look = CGFloat(p.look.x) * 2.5
-        let depth = (alert ? 12 : 10.5) * open
-        let band = Path(roundedRect: CGRect(x: 40 + tx, y: 124, width: 120, height: 38), cornerRadius: 19)
+        return (open, (p.mood == .sleepy ? 0.4 : 1) * pulse, alert)
+    }
 
-        // glow spilling onto the mask
-        var spill = h
-        spill.clip(to: band)
-        spill.opacity = 0.35 * strength
-        spill.addFilter(.blur(radius: 10))
-        for side in [-1.0, 1.0] {
-            spill.fill(ellipse(pt(100 + CGFloat(side) * 28 + tx, 150), 44, 18), with: .color(glow))
-        }
-
+    /// One thin, sharp glowing line per eye, slanting down toward the nose — an assassin's glare.
+    /// Thicker and brighter on alert, thinner when smug (happy), dim when sleepy.
+    private func drawEyes(_ h: GraphicsContext, _ p: Pose, tx: CGFloat) {
+        let st = eyeState(p)
         for side in [-1.0, 1.0] {
             let s = CGFloat(side)
-            let cx = 100 + s * 28 + tx + look, cy: CGFloat = 145
-            let inner = cx - s * 14, outer = cx + s * 21
-            let lidInner = pt(inner - s * 3, cy - 1), lidOuter = pt(outer + s * 2, cy - 11)
-
-            var eye = Path()
-            eye.move(to: lidInner)
-            eye.addLine(to: lidOuter)                                                   // straight hooded top
-            eye.addQuadCurve(to: pt(inner + s * 2, cy - 1 + depth),
-                             control: pt(cx + s * 6, cy - 4 + depth * 0.9))              // curved underside
-            eye.addLine(to: pt(inner - s * 1, cy + depth + 2.5))                       // inner hook
-            eye.closeSubpath()
-
-            var lit = h
-            lit.clip(to: Path(CGRect(x: cx - 40, y: lidOuter.y + (lidInner.y - lidOuter.y) * 0, width: 80, height: 40)))
-            var halo = lit
-            halo.addFilter(.blur(radius: alert ? 7 : 4.5))
-            halo.fill(eye, with: .color(glow.opacity(strength)))
-            h.fill(eye, with: .linearGradient(
-                Gradient(colors: [.white.opacity(0.95 * strength), glow.opacity(strength), glow.opacity(0.85 * strength)]),
-                startPoint: pt(inner, cy + depth * 0.3), endPoint: pt(outer, cy - 8)))
-
-            // the hood: a dark cut over the top so the glow can't leak upward
-            var lid = Path()
-            lid.move(to: pt(lidOuter.x + s * 8, lidOuter.y - 1))
-            lid.addLine(to: pt(lidInner.x - s * 8, lidInner.y + 3))
-            lid.addLine(to: pt(lidInner.x - s * 8, lidInner.y - 18))
-            lid.addLine(to: pt(lidOuter.x + s * 8, lidOuter.y - 18))
-            lid.closeSubpath()
-            var hood = h
-            hood.clip(to: band)
-            hood.fill(lid, with: .color(Color(red: 0.03, green: 0.03, blue: 0.05)))
-            var edge = Path()
-            edge.move(to: pt(lidOuter.x + s * 6, lidOuter.y - 3))
-            edge.addLine(to: pt(lidInner.x - s * 5, lidInner.y + 0.5))
-            if p.mood != .sleepy { h.line(edge, suitLight, 2.2) }
-
-            if alert && sin(p.t * 10) > 0.3 {
-                var flare = h
-                flare.addFilter(.blur(radius: 1.5))
-                flare.fill(Paint.sparkle(lidOuter, 8, 1.4), with: .color(.white.opacity(0.95)))
-            }
+            let cx = 100 + s * 28 + tx + CGFloat(p.look.x) * 2.5, cy: CGFloat = 144
+            var line = Path()
+            line.move(to: pt(cx + s * 20, cy - 8))
+            line.addLine(to: pt(cx - s * 14, cy + 3))
+            let w = max(1.5, (st.alert ? 5 : 4) * st.open)
+            var halo = h
+            halo.addFilter(.blur(radius: st.alert ? 7 : 5))
+            halo.line(line, glow.opacity(st.strength), w + 5)
+            h.line(line, glow.opacity(st.strength), w + 1.5)
+            h.line(line, .white.opacity(0.9 * st.strength), max(1, w * 0.45))
+            h.fill(circle(pt(cx - s * 14, cy + 3), w + 2), with: .color(.white.opacity(0.8 * st.strength)))
         }
     }
 
