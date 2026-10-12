@@ -3,7 +3,7 @@
 set -e
 cd "$(dirname "$0")/.."
 ./build.sh
-version=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$HOME/Applications/ClaudeBuddy.app/Contents/Info.plist")
+version="$(cat VERSION)"
 mkdir -p dist
 zip="dist/ClaudeBuddy-$version.zip"
 rm -f "$zip"

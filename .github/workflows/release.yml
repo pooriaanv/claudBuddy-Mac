@@ -1,0 +1,45 @@
+name: Release
+
+# Push a tag like v0.0.2 (matching the VERSION file) to build, test and publish a GitHub release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check VERSION matches the tag
+        run: |
+          version="$(cat VERSION)"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::VERSION is $version but the tag is $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Test
+        run: swift test
+
+      - name: Build and package
+        run: scripts/package.sh
+
+      - name: Release notes
+        run: |
+          zip="dist/ClaudeBuddy-$VERSION.zip"
+          awk -v v="$VERSION" '$0 == "## " v {on=1; next} /^## / {on=0} on' CHANGELOG.md > notes.md
+          sha="$(shasum -a 256 "$zip" | cut -d' ' -f1)"
+          sed -e "s/{{VERSION}}/$VERSION/g" -e "s/{{SHA256}}/$sha/g" .github/release-footer.md >> notes.md
+          cat notes.md
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "dist/ClaudeBuddy-$VERSION.zip" \
+            --title "ClaudeBuddy $VERSION" --notes-file notes.md

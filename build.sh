@@ -4,6 +4,7 @@
 set -e
 cd "$(dirname "$0")"
 
+version="$(cat VERSION)"
 swift build -c release --product ClaudeBuddy
 bin="$(swift build -c release --show-bin-path)/ClaudeBuddy"
 
@@ -17,7 +18,7 @@ iconset="$(mktemp -d)/AppIcon.iconset"
 iconutil -c icns -o "$app/Contents/Resources/AppIcon.icns" "$iconset"
 rm -r "$(dirname "$iconset")"
 
-cat > "$app/Contents/Info.plist" <<'PLIST'
+cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -27,8 +28,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
   <key>CFBundleExecutable</key><string>ClaudeBuddy</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.0.1</string>
-  <key>CFBundleVersion</key><string>1</string>
+  <key>CFBundleShortVersionString</key><string>${version}</string>
+  <key>CFBundleVersion</key><string>${version}</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
 </dict>

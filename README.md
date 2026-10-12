@@ -33,6 +33,14 @@ swift test                     # core logic tests
 scripts/package.sh             # build + zip for a release → dist/ClaudeBuddy-<version>.zip
 ```
 
+## Releasing
+
+1. Bump `VERSION`, add a `## <version>` section to `CHANGELOG.md`, commit.
+2. `git tag -a v<version> -m "ClaudeBuddy <version>" && git push origin v<version>`
+
+The [Release workflow](.github/workflows/release.yml) then tests, builds, zips and publishes the GitHub release
+(notes from `CHANGELOG.md` + install steps + SHA-256). It refuses tags that don't match `VERSION`.
+
 ## Connecting agents
 
 Settings → Agents → Connect, or from the command line:
