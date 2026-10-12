@@ -8,22 +8,65 @@ struct SettingsView: View {
     let onTestKnock: () -> Void
     let onCheckUpdates: () -> Void
     let onInstallUpdate: () -> Void
+    @State private var tab: Int
     @State private var agentRefresh = 0
     @State private var launchAtLogin = LaunchAtLogin.isEnabled
     @State private var error: String?
 
+    init(prefs: Preferences, updater: Updater, onTestKnock: @escaping () -> Void,
+         onCheckUpdates: @escaping () -> Void, onInstallUpdate: @escaping () -> Void, initialTab: Int = 0) {
+        self.prefs = prefs
+        self.updater = updater
+        self.onTestKnock = onTestKnock
+        self.onCheckUpdates = onCheckUpdates
+        self.onInstallUpdate = onInstallUpdate
+        _tab = State(initialValue: initialTab)
+    }
+
     private var l: L10n { prefs.l10n }
 
+    /// Four short tabs; each scrolls on its own if the window is small.
     var body: some View {
+        TabView(selection: $tab) {
+            characterTab
+                .tabItem { Label(l(.sectionCharacter), systemImage: "pawprint") }
+                .tag(0)
+            behaviorTab
+                .tabItem { Label(l(.sectionBehavior), systemImage: "sparkles") }
+                .tag(1)
+            agentsTab
+                .tabItem { Label(l(.sectionAgents), systemImage: "bolt.horizontal.circle") }
+                .tag(2)
+            updatesTab
+                .tabItem { Label(l(.sectionUpdates), systemImage: "arrow.down.circle") }
+                .tag(3)
+        }
+        .padding(.top, 4)
+        .frame(minWidth: 440, idealWidth: 520, minHeight: 300, idealHeight: 420)
+        .environment(\.layoutDirection, l.isRTL ? .rightToLeft : .leftToRight)
+        .alert(error ?? "", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+            Button("OK", role: .cancel) {}
+        }
+    }
+
+    private var characterTab: some View {
         Form {
-            Section(l(.sectionCharacter)) {
-                HStack(spacing: 10) {
+            Section {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 8)], spacing: 8) {
                     ForEach(SkinID.allCases) { skin in skinCard(skin) }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 2)
             }
+            Section {
+                Slider(value: $prefs.size, in: 110...230) { Text(l(.size)) }
+            }
+        }
+        .formStyle(.grouped)
+    }
 
-            Section(l(.sectionBehavior)) {
+    private var behaviorTab: some View {
+        Form {
+            Section {
                 Picker(l(.mischief), selection: $prefs.mischief) {
                     Text(l(.mischiefCalm)).tag(Mischief.calm)
                     Text(l(.mischiefPlayful)).tag(Mischief.playful)
@@ -31,7 +74,8 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
                 Text(l(.mischiefHint)).font(.caption).foregroundStyle(.secondary)
-                Slider(value: $prefs.size, in: 110...230) { Text(l(.size)) }
+            }
+            Section {
                 HStack {
                     Toggle(l(.sound), isOn: $prefs.soundOn)
                     Spacer()
@@ -45,7 +89,6 @@ struct SettingsView: View {
                         do { try LaunchAtLogin.set(on); launchAtLogin = on } catch { self.error = error.localizedDescription }
                     }))
             }
-
             Section(l(.sectionLanguage)) {
                 Picker(l(.sectionLanguage), selection: $prefs.language) {
                     Text(l(.languageSystem)).tag(Language.system)
@@ -55,8 +98,26 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
             }
+        }
+        .formStyle(.grouped)
+    }
 
-            Section(l(.sectionUpdates)) {
+    private var agentsTab: some View {
+        Form {
+            Section {
+                ForEach(AgentIntegration.allCases) { agent in agentRow(agent) }
+            }
+            Section {
+                Text(l(.codexTrustHint)).font(.caption).foregroundStyle(.secondary)
+                Text(l(.otherAgentsHint)).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private var updatesTab: some View {
+        Form {
+            Section {
                 HStack {
                     Text(updateStatus).foregroundStyle(updateStatusIsError ? Color.red : Color.primary)
                     Spacer()
@@ -69,20 +130,8 @@ struct SettingsView: View {
                 }
                 Toggle(l(.updatesAuto), isOn: $prefs.autoUpdate)
             }
-
-            Section(l(.sectionAgents)) {
-                ForEach(AgentIntegration.allCases) { agent in agentRow(agent) }
-                Text(l(.codexTrustHint)).font(.caption).foregroundStyle(.secondary)
-                Text(l(.otherAgentsHint)).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
-            }
         }
         .formStyle(.grouped)
-        .frame(width: 540)
-        .fixedSize(horizontal: false, vertical: true)
-        .environment(\.layoutDirection, l.isRTL ? .rightToLeft : .leftToRight)
-        .alert(error ?? "", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
-            Button("OK", role: .cancel) {}
-        }
     }
 
     private var updateStatus: String {
@@ -109,7 +158,7 @@ struct SettingsView: View {
         } label: {
             VStack(spacing: 4) {
                 SkinPreview(skin: skin, activity: selected ? .wave : .sit)
-                    .frame(width: 96, height: 128)
+                    .frame(width: 78, height: 104)
                 Text(l(skin.nameKey)).font(.callout.weight(selected ? .semibold : .regular))
             }
             .padding(6)
@@ -163,16 +212,26 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
                                     onTestKnock: { [weak coordinator] in coordinator?.testKnock() },
                                     onCheckUpdates: { [weak coordinator] in coordinator?.checkForUpdates() },
                                     onInstallUpdate: { [weak coordinator] in coordinator?.installUpdate() })
-            let w = NSWindow(contentViewController: NSHostingController(rootView: view))
-            w.styleMask = [.titled, .closable]
+            let host = NSHostingController(rootView: view)
+            host.sizingOptions = []   // the window decides its size; tabs scroll inside it
+            let w = NSWindow(contentViewController: host)
+            w.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+            w.contentMinSize = NSSize(width: 440, height: 300)
             w.isReleasedWhenClosed = false
             w.delegate = self
+            w.setContentSize(Self.fittingSize())
             w.center()
             window = w
         }
         updateTitle()
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    /// 520×440, but never taller than the screen allows.
+    static func fittingSize() -> NSSize {
+        let visible = (NSScreen.main ?? NSScreen.screens.first)?.visibleFrame.height ?? 800
+        return NSSize(width: 520, height: min(440, max(300, visible - 120)))
     }
 
     func updateTitle() {

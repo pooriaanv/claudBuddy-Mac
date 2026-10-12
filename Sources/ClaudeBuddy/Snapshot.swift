@@ -98,4 +98,27 @@ enum Snapshot {
             }
         }
     }
+
+    /// `ClaudeBuddy --settings-snapshot out.png WIDTHxHEIGHT [tab] [en|fa]`: the settings window, rendered offscreen.
+    static func renderSettings(to path: String, size: NSSize, tab: Int, language: Language) {
+        MainActor.assumeIsolated {
+            _ = NSApplication.shared
+            let prefs = Preferences()
+            prefs.language = language
+            let view = SettingsView(prefs: prefs, updater: Updater(), onTestKnock: {}, onCheckUpdates: {},
+                                    onInstallUpdate: {}, initialTab: tab)
+            let host = NSHostingController(rootView: view)
+            host.sizingOptions = []
+            let w = NSWindow(contentViewController: host)
+            w.styleMask = [.titled, .closable, .resizable]
+            w.setContentSize(size)
+            w.appearance = NSAppearance(named: language == .fa ? .aqua : .darkAqua)
+            w.setFrameOrigin(NSPoint(x: -20000, y: -20000))
+            w.orderFrontRegardless()
+            RunLoop.main.run(until: Date().addingTimeInterval(1.5))
+            guard let v = w.contentView, let rep = v.bitmapImageRepForCachingDisplay(in: v.bounds) else { return }
+            v.cacheDisplay(in: v.bounds, to: rep)
+            try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: path))
+        }
+    }
 }

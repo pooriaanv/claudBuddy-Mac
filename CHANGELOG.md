@@ -2,6 +2,11 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.3
+
+- Settings fit smaller screens: four tabs (Character, Behavior, Agents, Updates), a resizable window that never
+  gets taller than the screen, and tabs that scroll when needed
+
 ## 0.0.2
 
 - Update checker: checks GitHub Releases on launch and daily, downloads, verifies and installs new versions,
