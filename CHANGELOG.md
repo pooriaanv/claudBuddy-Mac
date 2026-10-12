@@ -2,6 +2,12 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.4
+
+- Knocks reliably for Claude Code in Terminal, iTerm, VS Code, Cursor…: the "already looking" quiet mode now only
+  applies to the agent's own app (Claude / Codex desktop)
+- "Already looking" means active in the last 15 s (was 45 s)
+
 ## 0.0.3
 
 - Settings fit smaller screens: four tabs (Character, Behavior, Agents, Updates), a resizable window that never

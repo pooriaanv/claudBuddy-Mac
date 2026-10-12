@@ -53,6 +53,14 @@ import Testing
         #expect(msg.payload["session_id"] as? String == "s")
     }
 
+    @Test func onlyAgentAppsCountAsWatching() {
+        #expect(AgentApps.isDedicated(bundleID: "com.anthropic.claudefordesktop", appName: "Claude"))
+        #expect(AgentApps.isDedicated(bundleID: nil, appName: "Codex"))
+        #expect(!AgentApps.isDedicated(bundleID: "com.apple.Terminal", appName: "Terminal"))
+        #expect(!AgentApps.isDedicated(bundleID: "com.microsoft.VSCode", appName: "Visual Studio Code"))
+        #expect(!AgentApps.isDedicated(bundleID: "com.googlecode.iterm2", appName: "iTerm"))
+    }
+
     @Test func unknownEventsAreIgnored() {
         #expect(AgentAdapters.event(from: InboxMessage.parse("claude PreCompact\n{}")) == nil)
     }

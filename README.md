@@ -63,9 +63,10 @@ Both tools get the same hooks (a `.buddy-backup` of the original file is kept):
 | `UserPromptSubmit`, `PostToolUse` | `… dismiss` | you're back → go home |
 
 **Already looking?** `notify.sh` records which app the session runs in (the topmost `.app` in its process
-tree: Claude.app, Terminal, VS Code…). If that app is frontmost and you've been active in the last 45 s, the
-buddy doesn't knock — it just puts a red dot on the menu-bar face and lists the session in the menu. If you
-walk away, the agent's "still waiting" reminder makes it knock after all. (Toggle in Settings.)
+tree). If that's the agent's own app (Claude / Codex desktop), it's frontmost, and you've been active in the
+last 15 s, the buddy doesn't knock — it shows a small `✓ project` hint above its head and a red dot on the
+menu-bar face. Sessions in Terminal, iTerm, VS Code, Cursor… always get a knock (you're in those apps for
+other work too). If you walk away, the agent's "still waiting" reminder makes it knock after all.
 
 Codex: after connecting, run `/hooks` in Codex once and trust the buddy hooks.
 Codex's legacy `notify = ["~/.claude-buddy/notify.sh", "codex"]` also works.

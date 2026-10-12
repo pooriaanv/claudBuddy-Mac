@@ -110,6 +110,18 @@ public struct GenericAgentAdapter: AgentAdapter {
     }
 }
 
+/// Apps that are nothing but an AI agent's UI. Being in front of one means you're looking at the agent.
+/// Terminals and editors host far more than the agent, so being in them doesn't count as watching it.
+public enum AgentApps {
+    public static let bundleIDs: Set<String> = ["com.anthropic.claudefordesktop", "com.openai.codex", "com.openai.chat"]
+
+    public static func isDedicated(bundleID: String?, appName: String) -> Bool {
+        if let id = bundleID, bundleIDs.contains(id) { return true }
+        let name = appName.lowercased()
+        return name.hasPrefix("claude") || name.hasPrefix("codex")
+    }
+}
+
 public enum AgentAdapters {
     public static let known: [AgentAdapter] = [
         HookAgentAdapter(source: "claude", displayName: "Claude"),

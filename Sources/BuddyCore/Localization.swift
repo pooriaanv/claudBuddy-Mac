@@ -114,9 +114,9 @@ public struct L10n {
         .testKnock: ("Try a knock", "امتحان کن"),
         .launchAtLogin: ("Open at login", "با روشن شدن مک باز شه"),
         .languageSystem: ("System", "زبان سیستم"),
-        .quietWhenWatching: ("Don't knock if I'm already in the agent's window", "اگه تو پنجره‌ی خود ایجنت هستم در نزن"),
-        .quietHint: ("It just puts a dot on the menu-bar icon instead. If you walk away, it knocks when the agent reminds you.",
-                     "به جاش فقط یه نقطه روی آیکون منوبار می‌ذاره. اگه از پشت سیستم بلند شی، با یادآوری ایجنت میاد در می‌زنه."),
+        .quietWhenWatching: ("Don't knock if I'm already in the Claude / Codex app", "اگه تو خود اپ Claude یا Codex هستم در نزن"),
+        .quietHint: ("Only for the agent's own app (sessions in Terminal or an editor always get a knock). It shows a small hint above the buddy instead; if you walk away, it knocks when the agent reminds you.",
+                     "فقط برای خود اپ ایجنت (سشن‌های داخل ترمینال یا ادیتور همیشه در می‌زنن). به جاش یه نشونه‌ی کوچیک بالای سر رفیق میاد؛ اگه از پشت سیستم بلند شی، با یادآوری ایجنت میاد در می‌زنه."),
         .menuWaiting: ("Waiting for you", "منتظرتن"),
 
         .connected: ("Connected", "وصله"),
