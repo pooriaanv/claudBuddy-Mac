@@ -6,7 +6,7 @@ import SwiftUI
 enum Snapshot {
     struct Shot {
         let label: String
-        let input: AnimationInput
+        var input: AnimationInput
         var bubble: Bubble?
         var hint: String?
     }
