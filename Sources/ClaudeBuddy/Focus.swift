@@ -19,6 +19,23 @@ enum Focus {
                                     appName: hostURL.deletingPathExtension().lastPathComponent) else { return false }
         let same = front.standardizedFileURL.resolvingSymlinksInPath().path
             == URL(fileURLWithPath: host).standardizedFileURL.resolvingSymlinksInPath().path
-        return same && userIdleSeconds() < seconds
+        guard same, userIdleSeconds() < seconds,
+              let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return false }
+        // Active isn't enough: a minimized app stays "frontmost" with nothing on screen.
+        return ScreenWindows.frontmostOwner(onScreenWindows()) == pid
+    }
+
+    /// On-screen windows, front to back. Owner and bounds need no screen-recording permission (titles would).
+    static func onScreenWindows() -> [WindowInfo] {
+        let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+            as? [[String: Any]] ?? []
+        return list.compactMap { w in
+            guard let pid = w[kCGWindowOwnerPID as String] as? Int32,
+                  let layer = w[kCGWindowLayer as String] as? Int,
+                  let bounds = w[kCGWindowBounds as String] as? [String: Any],
+                  let rect = CGRect(dictionaryRepresentation: bounds as CFDictionary) else { return nil }
+            let alpha = w[kCGWindowAlpha as String] as? Double ?? 1
+            return WindowInfo(ownerPID: pid, layer: layer, alpha: alpha, width: rect.width, height: rect.height)
+        }
     }
 }

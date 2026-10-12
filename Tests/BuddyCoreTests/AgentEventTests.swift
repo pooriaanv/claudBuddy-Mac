@@ -61,6 +61,18 @@ import Testing
         #expect(!AgentApps.isDedicated(bundleID: "com.googlecode.iterm2", appName: "iTerm"))
     }
 
+    @Test func frontmostWindowOwnerSkipsOverlaysAndTinyWindows() {
+        let windows = [
+            WindowInfo(ownerPID: 1, layer: 25, width: 400, height: 400),   // status-bar level overlay
+            WindowInfo(ownerPID: 2, layer: 0, alpha: 0, width: 800, height: 600), // invisible
+            WindowInfo(ownerPID: 3, layer: 0, width: 20, height: 20),       // tiny helper window
+            WindowInfo(ownerPID: 4, layer: 0, width: 1200, height: 800),    // the real front window
+            WindowInfo(ownerPID: 5, layer: 0, width: 1200, height: 800),
+        ]
+        #expect(ScreenWindows.frontmostOwner(windows) == 4)
+        #expect(ScreenWindows.frontmostOwner([]) == nil)   // e.g. the only app is minimized
+    }
+
     @Test func unknownEventsAreIgnored() {
         #expect(AgentAdapters.event(from: InboxMessage.parse("claude PreCompact\n{}")) == nil)
     }

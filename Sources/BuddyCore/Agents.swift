@@ -122,6 +122,31 @@ public enum AgentApps {
     }
 }
 
+/// One on-screen window, as reported by the window server (front to back).
+public struct WindowInfo: Equatable {
+    public var ownerPID: Int32
+    public var layer: Int
+    public var alpha: Double
+    public var width: Double
+    public var height: Double
+
+    public init(ownerPID: Int32, layer: Int, alpha: Double = 1, width: Double, height: Double) {
+        self.ownerPID = ownerPID
+        self.layer = layer
+        self.alpha = alpha
+        self.width = width
+        self.height = height
+    }
+}
+
+public enum ScreenWindows {
+    /// The app owning the topmost normal window actually on screen. A minimized or hidden app has none, even if
+    /// it's still the "active" app.
+    public static func frontmostOwner(_ windows: [WindowInfo]) -> Int32? {
+        windows.first { $0.layer == 0 && $0.alpha > 0.05 && $0.width >= 80 && $0.height >= 80 }?.ownerPID
+    }
+}
+
 public enum AgentAdapters {
     public static let known: [AgentAdapter] = [
         HookAgentAdapter(source: "claude", displayName: "Claude"),

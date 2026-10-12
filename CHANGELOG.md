@@ -2,6 +2,12 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.6
+
+- Fix: with "Don't knock if I'm already in the Claude / Codex app" on, a **minimized** Claude window still counted
+  as "looking" (a minimized app stays the active app), so the buddy only showed the hint. Now the agent's window
+  has to actually be the top window on screen.
+
 ## 0.0.5
 
 - "Don't knock if I'm already in the Claude / Codex app" is now **off by default**, so the buddy always knocks

@@ -83,6 +83,9 @@ final class Coordinator: NSObject {
 
     func handle(_ event: AgentEvent) {
         let watching = prefs.quietWhenWatching && Focus.isWatching(host: event.host)
+        if ProcessInfo.processInfo.environment["BUDDY_DEBUG"] != nil {
+            FileHandle.standardError.write("event \(event.kind) host=\(event.host ?? "-") watching=\(watching)\n".data(using: .utf8)!)
+        }
         switch queue.apply(event, watching: watching) {
         case .knock:
             let b = prefs.l10n.bubble(for: queue.entries)
