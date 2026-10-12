@@ -2,6 +2,12 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.8
+
+- New **Ninja** look, "Shadow": all-black mask with glowing slit eyes, crossed arms while idle, tattered crimson
+  scarf, scratched-out headband plate, shoulder armor, smoke at its feet, and a glowing katana when it dances
+- **Cyber Ninja**: the same ninja with cyan eyes and blade (pick either in Settings)
+
 ## 0.0.7
 
 - Two new characters: **Bunny** (four legs, hops instead of walking, floppy ears when sleepy) and **Ninja**

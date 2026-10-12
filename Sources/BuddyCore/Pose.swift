@@ -17,7 +17,7 @@ public enum Posture: Equatable, CaseIterable {
 
 /// The available characters. Each has a matching skin in the app's `Render/Skins` folder.
 public enum SkinID: String, CaseIterable, Identifiable {
-    case buddy, kitty, puppy, bunny, robo, ninja
+    case buddy, kitty, puppy, bunny, robo, ninja, cyberNinja
     public var id: String { rawValue }
     public var nameKey: L10nKey {
         switch self {
@@ -27,6 +27,7 @@ public enum SkinID: String, CaseIterable, Identifiable {
         case .bunny: return .skinBunny
         case .robo: return .skinRobo
         case .ninja: return .skinNinja
+        case .cyberNinja: return .skinCyberNinja
         }
     }
 }

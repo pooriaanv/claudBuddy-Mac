@@ -38,6 +38,7 @@ enum SkinCatalog {
         case .robo: return RoboSkin()
         case .bunny: return BunnySkin()
         case .ninja: return NinjaSkin()
+        case .cyberNinja: return NinjaSkin(glow: Color(red: 0.20, green: 0.88, blue: 1.0))
         }
     }
 }
