@@ -15,6 +15,9 @@ public enum L10nKey: String, CaseIterable {
     case mischief, mischiefCalm, mischiefPlayful, mischiefNaughty, mischiefHint
     case size, sound, testKnock, launchAtLogin, languageSystem, quietWhenWatching, quietHint, menuWaiting
     case connected, notConnected, connect, disconnect, toolNotFound, codexTrustHint, otherAgentsHint
+    // updates
+    case sectionUpdates, menuCheckUpdates, menuInstallUpdate, updatesAuto, updateVersion, updateUpToDate
+    case updateAvailable, updateChecking, updateInstalling, updateFailed, checkNow, installNow
 }
 
 /// Strings in English and Persian. `{agent}` and `{n}` are placeholders.
@@ -35,8 +38,9 @@ public struct L10n {
         return language == .fa ? pair.fa : pair.en
     }
 
-    public func format(_ key: L10nKey, agent: String = "", n: Int = 0) -> String {
+    public func format(_ key: L10nKey, agent: String = "", n: Int = 0, v: String = "") -> String {
         self(key).replacingOccurrences(of: "{agent}", with: agent).replacingOccurrences(of: "{n}", with: number(n))
+            .replacingOccurrences(of: "{v}", with: v)
     }
 
     public func number(_ n: Int) -> String {
@@ -122,6 +126,18 @@ public struct L10n {
         .toolNotFound: ("not found on this Mac", "روی این مک پیدا نشد"),
         .codexTrustHint: ("After connecting, run /hooks in Codex once and trust the buddy hooks.",
                           "بعد از وصل کردن، یه بار تو Codex دستور /hooks رو بزن و هوک‌های رفیق رو تأیید کن."),
+        .sectionUpdates: ("Updates", "به‌روزرسانی"),
+        .menuCheckUpdates: ("Check for Updates…", "بررسی به‌روزرسانی…"),
+        .menuInstallUpdate: ("⬆︎ Update to {v}", "⬆︎ به‌روزرسانی به {v}"),
+        .updatesAuto: ("Install updates automatically", "به‌روزرسانی‌ها خودکار نصب بشن"),
+        .updateVersion: ("Version {v}", "نسخه‌ی {v}"),
+        .updateUpToDate: ("Up to date ({v})", "آخرین نسخه رو داری ({v})"),
+        .updateAvailable: ("Version {v} is available", "نسخه‌ی {v} اومده"),
+        .updateChecking: ("Checking…", "در حال بررسی…"),
+        .updateInstalling: ("Downloading and installing…", "در حال دانلود و نصب…"),
+        .updateFailed: ("Update failed: {v}", "به‌روزرسانی نشد: {v}"),
+        .checkNow: ("Check now", "الان چک کن"),
+        .installNow: ("Install & restart", "نصب و اجرای دوباره"),
         .otherAgentsHint: ("Any other tool can call:  ~/.claude-buddy/notify.sh <name> done",
                            "هر ابزار دیگه‌ای هم می‌تونه صدا بزنه:  ~/.claude-buddy/notify.sh <name> done"),
     ]

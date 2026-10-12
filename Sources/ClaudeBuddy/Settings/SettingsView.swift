@@ -4,7 +4,10 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var prefs: Preferences
+    @ObservedObject var updater: Updater
     let onTestKnock: () -> Void
+    let onCheckUpdates: () -> Void
+    let onInstallUpdate: () -> Void
     @State private var agentRefresh = 0
     @State private var launchAtLogin = LaunchAtLogin.isEnabled
     @State private var error: String?
@@ -53,6 +56,20 @@ struct SettingsView: View {
                 .labelsHidden()
             }
 
+            Section(l(.sectionUpdates)) {
+                HStack {
+                    Text(updateStatus).foregroundStyle(updateStatusIsError ? Color.red : Color.primary)
+                    Spacer()
+                    if updater.available != nil && updater.canInstall {
+                        Button(l(.installNow), action: onInstallUpdate).buttonStyle(.borderedProminent)
+                    } else {
+                        Button(l(.checkNow), action: onCheckUpdates)
+                            .disabled(updater.state == .checking || updater.state == .installing)
+                    }
+                }
+                Toggle(l(.updatesAuto), isOn: $prefs.autoUpdate)
+            }
+
             Section(l(.sectionAgents)) {
                 ForEach(AgentIntegration.allCases) { agent in agentRow(agent) }
                 Text(l(.codexTrustHint)).font(.caption).foregroundStyle(.secondary)
@@ -66,6 +83,23 @@ struct SettingsView: View {
         .alert(error ?? "", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
             Button("OK", role: .cancel) {}
         }
+    }
+
+    private var updateStatus: String {
+        let current = updater.current.description
+        switch updater.state {
+        case .idle: return l.format(.updateVersion, v: current)
+        case .checking: return l(.updateChecking)
+        case .upToDate: return l.format(.updateUpToDate, v: current)
+        case .available(let r): return l.format(.updateAvailable, v: r.version.description)
+        case .installing: return l(.updateInstalling)
+        case .failed(let message): return l.format(.updateFailed, v: message)
+        }
+    }
+
+    private var updateStatusIsError: Bool {
+        if case .failed = updater.state { return true }
+        return false
     }
 
     private func skinCard(_ skin: SkinID) -> some View {
@@ -125,7 +159,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     func show() {
         if window == nil {
-            let view = SettingsView(prefs: coordinator.prefs, onTestKnock: { [weak coordinator] in coordinator?.testKnock() })
+            let view = SettingsView(prefs: coordinator.prefs, updater: coordinator.updater,
+                                    onTestKnock: { [weak coordinator] in coordinator?.testKnock() },
+                                    onCheckUpdates: { [weak coordinator] in coordinator?.checkForUpdates() },
+                                    onInstallUpdate: { [weak coordinator] in coordinator?.installUpdate() })
             let w = NSWindow(contentViewController: NSHostingController(rootView: view))
             w.styleMask = [.titled, .closable]
             w.isReleasedWhenClosed = false

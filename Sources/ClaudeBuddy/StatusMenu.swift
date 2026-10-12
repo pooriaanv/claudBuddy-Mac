@@ -37,7 +37,12 @@ final class StatusMenu: NSObject {
             }
             menu.addItem(.separator())
         }
+        if let update = coordinator.updater.available {
+            menu.addItem(entry(l.format(.menuInstallUpdate, v: update.version.description), #selector(installUpdate)))
+            menu.addItem(.separator())
+        }
         menu.addItem(entry(l(.menuSettings), #selector(openSettings), key: ","))
+        menu.addItem(entry(l(.menuCheckUpdates), #selector(checkUpdates)))
         menu.addItem(.separator())
         menu.addItem(entry(l(.menuTestKnock), #selector(testKnock)))
         menu.addItem(entry(l(.menuSendHome), #selector(sendHome)))
@@ -56,6 +61,8 @@ final class StatusMenu: NSObject {
     }
 
     @objc private func openSettings() { coordinator.openSettings() }
+    @objc private func checkUpdates() { coordinator.checkForUpdates() }
+    @objc private func installUpdate() { coordinator.installUpdate() }
     @objc private func testKnock() { coordinator.testKnock() }
     @objc private func sendHome() { coordinator.dismissAll() }
     @objc private func toggleMute() { coordinator.prefs.soundOn.toggle() }

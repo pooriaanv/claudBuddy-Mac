@@ -18,6 +18,10 @@ jumps up to the "glass" and knocks until you come back.
 2. It isn't notarized, so the first time: right-click → Open (or System Settings → Privacy & Security → Open Anyway).
 3. Menu-bar face → Settings… → Agents → Connect Claude Code and/or Codex.
 
+**Updates:** the app checks GitHub Releases on launch and about once a day (or menu → Check for Updates…).
+A newer version is downloaded, verified (GitHub's SHA-256, code signature, bundle id, version) and swapped in,
+then the app relaunches — automatically unless you turn that off in Settings; never while it's knocking.
+
 ## Build & install
 
 ```bash

@@ -2,6 +2,11 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## Unreleased
+
+- Update checker: checks GitHub Releases on launch and daily, downloads, verifies and installs new versions,
+  then relaunches (Settings → Updates; menu → Check for Updates…)
+
 ## 0.0.1
 
 First release of ClaudeBuddy — a cute desktop pet for macOS that lives on your wallpaper and knocks on the

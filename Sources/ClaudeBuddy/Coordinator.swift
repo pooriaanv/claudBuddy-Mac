@@ -5,6 +5,7 @@ import Combine
 /// Wires everything together: agent events → attention queue → pet; preferences → pet, menu, settings.
 final class Coordinator: NSObject {
     let prefs = Preferences()
+    let updater = Updater()
     private(set) lazy var pet = PetController(prefs: prefs)
     private var queue = AttentionQueue()
     private let inbox = InboxDirectory(url: BuddyPaths.inbox)
@@ -34,6 +35,41 @@ final class Coordinator: NSObject {
 
         Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in self?.pollInbox() }
         pollInbox()
+
+        updater.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.updaterChanged() }
+            .store(in: &observers)
+        Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in self?.checkForUpdatesIfDue() }
+        Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in self?.checkForUpdatesIfDue() }
+    }
+
+    // MARK: updates
+
+    /// At most about once a day on its own.
+    private func checkForUpdatesIfDue() {
+        let last = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
+        if Date().timeIntervalSince(last) > 20 * 3600 { checkForUpdates() }
+    }
+
+    func checkForUpdates() {
+        Task { @MainActor in await updater.check() }
+    }
+
+    func installUpdate() {
+        guard let release = updater.available else { return }
+        Task { @MainActor in await updater.install(release) }
+    }
+
+    private func updaterChanged() {
+        menu.rebuild()
+        installUpdateIfAllowed()
+    }
+
+    /// Auto-install only when nothing is waiting and the buddy is just hanging out.
+    private func installUpdateIfAllowed() {
+        guard prefs.autoUpdate, updater.canInstall, updater.available != nil, queue.isEmpty, pet.mode == .idle else { return }
+        installUpdate()
     }
 
     // MARK: agent events
@@ -72,6 +108,7 @@ final class Coordinator: NSObject {
         BuddyPaths.setActive(!queue.isEmpty)
         menu.update(waiting: queue.entries)
         pet.hint = prefs.l10n.hint(for: queue.entries.filter(\.quiet))
+        installUpdateIfAllowed()
     }
 
     func testKnock() {
