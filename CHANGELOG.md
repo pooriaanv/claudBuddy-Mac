@@ -2,6 +2,11 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.9
+
+- Fluffier, cuter **Bunny**: tufty fur, puffy cheeks, a forehead tuft, big sparkly eyes, a fluffy bib,
+  a bigger cotton tail and one ear tip folded over
+
 ## 0.0.8
 
 - New **Ninja** look, "Shadow": all-black mask with glowing slit eyes, crossed arms while idle, tattered crimson
