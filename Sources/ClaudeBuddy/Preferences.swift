@@ -46,7 +46,8 @@ final class Preferences: ObservableObject {
         mischief = Mischief(rawValue: defaults.string(forKey: "mischief") ?? "") ?? .playful
         soundOn = defaults.object(forKey: "soundOn") as? Bool ?? !defaults.bool(forKey: "muted")
         size = defaults.object(forKey: "size") as? Double ?? 150
-        quietWhenWatching = defaults.object(forKey: "quietWhenWatching") as? Bool ?? true
+        // Off by default: we can't tell which Claude session is on screen, so "quiet" can hide knocks you wanted.
+        quietWhenWatching = defaults.object(forKey: "quietWhenWatching") as? Bool ?? false
         autoUpdate = defaults.object(forKey: "autoUpdate") as? Bool ?? true
     }
 

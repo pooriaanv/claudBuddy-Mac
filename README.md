@@ -62,7 +62,7 @@ Both tools get the same hooks (a `.buddy-backup` of the original file is kept):
 | `Notification` (Claude) / `PermissionRequest` (Codex) | `… waiting` / `… permission` | knock: needs your OK |
 | `UserPromptSubmit`, `PostToolUse` | `… dismiss` | you're back → go home |
 
-**Already looking?** `notify.sh` records which app the session runs in (the topmost `.app` in its process
+**Already looking?** (optional, off by default — Settings → Behavior) `notify.sh` records which app the session runs in (the topmost `.app` in its process
 tree). If that's the agent's own app (Claude / Codex desktop), it's frontmost, and you've been active in the
 last 15 s, the buddy doesn't knock — it shows a small `✓ project` hint above its head and a red dot on the
 menu-bar face. Sessions in Terminal, iTerm, VS Code, Cursor… always get a knock (you're in those apps for

@@ -2,6 +2,12 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
+## 0.0.5
+
+- "Don't knock if I'm already in the Claude / Codex app" is now **off by default**, so the buddy always knocks
+  out of the box. The app can't tell which session is on screen, so quiet mode could hide knocks for other
+  sessions. Turn it on in Settings → Behavior if you want it.
+
 ## 0.0.4
 
 - Knocks reliably for Claude Code in Terminal, iTerm, VS Code, Cursor…: the "already looking" quiet mode now only
