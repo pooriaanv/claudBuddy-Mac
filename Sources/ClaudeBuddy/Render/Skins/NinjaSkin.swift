@@ -121,36 +121,39 @@ struct NinjaSkin: Skin {
     /// Narrow, angled, glowing slits — they get brighter and pulse when it's on alert.
     // MARK: eyes
 
-    private func eyeState(_ p: Pose) -> (open: CGFloat, strength: Double, alert: Bool) {
+    /// Narrow glowing slits, inner corner low and outer corner high — a glare. Brighter and pulsing on alert,
+    /// narrower when smug (happy), dim when sleepy.
+    private func drawEyes(_ h: GraphicsContext, _ p: Pose, tx: CGFloat) {
         let open: CGFloat
         switch p.mood {
         case .sleepy: open = max(0.15, CGFloat(p.eyeOpen))
-        case .surprised: open = 1.3
-        case .happy: open = 0.55
+        case .surprised: open = 1.5
+        case .happy: open = 0.55                // smug narrowing
         default: open = max(0.12, CGFloat(p.eyeOpen))
         }
         let alert = p.mood == .excited
-        let pulse = alert ? 0.8 + 0.2 * sin(p.t * 10) : 1
-        return (open, (p.mood == .sleepy ? 0.4 : 1) * pulse, alert)
-    }
+        let pulse = alert ? 0.75 + 0.25 * sin(p.t * 10) : 1
+        let strength = (p.mood == .sleepy ? 0.45 : 1) * pulse
+        let look = CGFloat(p.look.x) * 2.5
 
-    /// One thin, sharp glowing line per eye, slanting down toward the nose — an assassin's glare.
-    /// Thicker and brighter on alert, thinner when smug (happy), dim when sleepy.
-    private func drawEyes(_ h: GraphicsContext, _ p: Pose, tx: CGFloat) {
-        let st = eyeState(p)
         for side in [-1.0, 1.0] {
             let s = CGFloat(side)
-            let cx = 100 + s * 28 + tx + CGFloat(p.look.x) * 2.5, cy: CGFloat = 144
-            var line = Path()
-            line.move(to: pt(cx + s * 20, cy - 8))
-            line.addLine(to: pt(cx - s * 14, cy + 3))
-            let w = max(1.5, (st.alert ? 5 : 4) * st.open)
+            let cx = 100 + s * 28 + tx + look, cy: CGFloat = 143
+            let half: CGFloat = 15, height: CGFloat = 9 * open
+            let inner = cx - s * half, outer = cx + s * half
+            var slit = Path()
+            slit.move(to: pt(inner, cy - height / 2 + 5))      // inner corner sits lower…
+            slit.addLine(to: pt(outer, cy - height / 2))       // …than the outer one: a glare, not a frown
+            slit.addLine(to: pt(outer - s * 2, cy + height / 2))
+            slit.addLine(to: pt(inner + s * 3, cy + height / 2 + 4))
+            slit.closeSubpath()
             var halo = h
-            halo.addFilter(.blur(radius: st.alert ? 7 : 5))
-            halo.line(line, glow.opacity(st.strength), w + 5)
-            h.line(line, glow.opacity(st.strength), w + 1.5)
-            h.line(line, .white.opacity(0.9 * st.strength), max(1, w * 0.45))
-            h.fill(circle(pt(cx - s * 14, cy + 3), w + 2), with: .color(.white.opacity(0.8 * st.strength)))
+            halo.addFilter(.blur(radius: alert ? 7 : 5))
+            halo.fill(slit, with: .color(glow.opacity(0.85 * strength)))
+            h.fill(slit, with: .color(glow.opacity(strength)))
+            var core = h
+            core.clip(to: slit)
+            core.fill(Path(CGRect(x: cx - half, y: cy - 1.5 + 2.5, width: half * 2, height: 3)), with: .color(.white.opacity(0.65 * strength)))
         }
     }
 

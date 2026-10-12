@@ -6,8 +6,7 @@ Each `## <version>` section becomes the GitHub release notes for tag `v<version>
 
 - Fluffier, cuter **Bunny**: tufty fur, puffy cheeks, a forehead tuft, big sparkly eyes, a fluffy bib,
   a bigger cotton tail and one ear tip folded over
-- Meaner **Ninja / Cyber Ninja** eyes: one thin, sharp glowing slash per eye slanting toward the nose
-  (they no longer look sad)
+- **Ninja / Cyber Ninja** eyes no longer look sad: the glowing slits now slant down toward the nose (a glare)
 
 ## 0.0.8
 
