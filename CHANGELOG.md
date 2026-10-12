@@ -2,7 +2,7 @@
 
 Each `## <version>` section becomes the GitHub release notes for tag `v<version>`.
 
-## Unreleased
+## 0.0.2
 
 - Update checker: checks GitHub Releases on launch and daily, downloads, verifies and installs new versions,
   then relaunches (Settings → Updates; menu → Check for Updates…)
