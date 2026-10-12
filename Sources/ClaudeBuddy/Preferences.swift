@@ -9,6 +9,17 @@ enum BuddyPaths {
     static let activeMarker = root.appendingPathComponent("active")
     static let notifyScript = root.appendingPathComponent("notify.sh")
 
+    /// Copies the bundled notify.sh to ~/.claude-buddy/ (where agent hooks call it), so a downloaded app works on its own.
+    static func installNotifyScript() {
+        guard let bundled = Bundle.main.url(forResource: "notify", withExtension: "sh"),
+              let data = try? Data(contentsOf: bundled) else { return }
+        let fm = FileManager.default
+        if (try? Data(contentsOf: notifyScript)) == data { return }
+        try? fm.createDirectory(at: root, withIntermediateDirectories: true)
+        try? data.write(to: notifyScript, options: .atomic)
+        try? fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: notifyScript.path)
+    }
+
     static func setActive(_ on: Bool) {
         if on { FileManager.default.createFile(atPath: activeMarker.path, contents: Data()) }
         else { try? FileManager.default.removeItem(at: activeMarker) }

@@ -11,6 +11,13 @@ jumps up to the "glass" and knocks until you come back.
   Its eyes follow your cursor; it waves when you come close; it sleeps when you're idle.
 - **Bilingual:** English / فارسی (or follow the system language).
 
+## Download
+
+1. Grab `ClaudeBuddy-<version>.zip` from [Releases](https://github.com/pooriaanv/claudBuddy-Mac/releases), unzip,
+   move `ClaudeBuddy.app` to Applications.
+2. It isn't notarized, so the first time: right-click → Open (or System Settings → Privacy & Security → Open Anyway).
+3. Menu-bar face → Settings… → Agents → Connect Claude Code and/or Codex.
+
 ## Build & install
 
 ```bash
@@ -23,6 +30,7 @@ jumps up to the "glass" and knocks until you come back.
 
 ```bash
 swift test                     # core logic tests
+scripts/package.sh             # build + zip for a release → dist/ClaudeBuddy-<version>.zip
 ```
 
 ## Connecting agents

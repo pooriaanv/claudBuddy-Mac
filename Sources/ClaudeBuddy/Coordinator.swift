@@ -14,6 +14,7 @@ final class Coordinator: NSObject {
 
     func start() {
         try? FileManager.default.createDirectory(at: BuddyPaths.inbox, withIntermediateDirectories: true)
+        BuddyPaths.installNotifyScript()
         BuddyPaths.setActive(false)
         inbox.clean(olderThan: 15)
 

@@ -11,6 +11,7 @@ app="$HOME/Applications/ClaudeBuddy.app"
 mkdir -p "$app/Contents/MacOS"
 cp "$bin" "$app/Contents/MacOS/ClaudeBuddy"
 mkdir -p "$app/Contents/Resources"
+cp scripts/notify.sh "$app/Contents/Resources/notify.sh"   # the app installs it to ~/.claude-buddy on launch
 iconset="$(mktemp -d)/AppIcon.iconset"
 "$bin" --iconset "$iconset"
 iconutil -c icns -o "$app/Contents/Resources/AppIcon.icns" "$iconset"
@@ -26,7 +27,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
   <key>CFBundleExecutable</key><string>ClaudeBuddy</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>2.0</string>
+  <key>CFBundleShortVersionString</key><string>0.0.1</string>
+  <key>CFBundleVersion</key><string>1</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
 </dict>
