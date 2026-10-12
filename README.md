@@ -1,0 +1,107 @@
+# ClaudeBuddy
+
+A cute macOS desktop pet that lives on your wallpaper. It nods, blinks, wanders around, naps when you're
+away, and — when an AI coding agent (Claude Code, Codex, or anything else) finishes or needs permission —
+jumps up to the "glass" and knocks until you come back.
+
+- **Characters:** Buddy (little guy), Robo, and Kitty & Puppy — real four-legged animals that walk on diagonal
+  leg pairs, sit, stretch, curl up to sleep and rear up on their hind legs to paw at the glass. Pick one in Settings.
+- **Mischief:** Calm (sits, looks around), Playful (walks, dances, jumps), Naughty (all that + chases your cursor).
+- **Pet it:** click for hearts; drag it around (it dangles) and drop it — it falls back to the floor.
+  Its eyes follow your cursor; it waves when you come close; it sleeps when you're idle.
+- **Bilingual:** English / فارسی (or follow the system language).
+
+## Build & install
+
+```bash
+./build.sh
+```
+
+- App: `~/Applications/ClaudeBuddy.app` (menu-bar icon, no Dock icon). Restarts itself if it was running.
+- Hook script: `~/.claude-buddy/notify.sh`
+- Settings: menu-bar icon → Settings…  (character, mischief, size, sound, language, agents, open at login)
+
+```bash
+swift test                     # core logic tests
+```
+
+## Connecting agents
+
+Settings → Agents → Connect, or from the command line:
+
+```bash
+~/Applications/ClaudeBuddy.app/Contents/MacOS/ClaudeBuddy --connect claude   # ~/.claude/settings.json
+~/Applications/ClaudeBuddy.app/Contents/MacOS/ClaudeBuddy --connect codex    # ~/.codex/hooks.json
+```
+
+Both tools get the same hooks (a `.buddy-backup` of the original file is kept):
+
+| Hook | Runs | Effect |
+|---|---|---|
+| `Stop` | `notify.sh <agent> done` | come knock |
+| `Notification` (Claude) / `PermissionRequest` (Codex) | `… waiting` / `… permission` | knock: needs your OK |
+| `UserPromptSubmit`, `PostToolUse` | `… dismiss` | you're back → go home |
+
+**Already looking?** `notify.sh` records which app the session runs in (the topmost `.app` in its process
+tree: Claude.app, Terminal, VS Code…). If that app is frontmost and you've been active in the last 45 s, the
+buddy doesn't knock — it just puts a red dot on the menu-bar face and lists the session in the menu. If you
+walk away, the agent's "still waiting" reminder makes it knock after all. (Toggle in Settings.)
+
+Codex: after connecting, run `/hooks` in Codex once and trust the buddy hooks.
+Codex's legacy `notify = ["~/.claude-buddy/notify.sh", "codex"]` also works.
+
+**Any other tool** can call it:
+
+```bash
+~/.claude-buddy/notify.sh gemini done '{"project": "blog"}'
+~/.claude-buddy/notify.sh aider waiting '{"message": "tests are red"}'
+~/.claude-buddy/notify.sh gemini dismiss
+```
+
+## Architecture
+
+```
+Sources/
+  BuddyCore/                 pure logic, no AppKit — unit tested
+    Agents.swift             AgentEvent + adapters (Claude/Codex hooks, generic tools)
+    Inbox.swift              event files written by notify.sh
+    Attention.swift          who's waiting → knock / update / go home
+    Brain.swift              idle behavior state machine (sit, walk, dance, sleep, wave, chase…)
+    Animation.swift          Animator: state + time → PetScene (pose + effects); knock choreography
+    Pose.swift               Pose, PetScene, SkinID
+    Localization.swift       en / fa strings
+  ClaudeBuddy/               the macOS app
+    Coordinator.swift        wires inbox → queue → pet; preferences → everything
+    PetController.swift      window on the desktop floor: walking, drag/drop, falling, knocking, frame clock
+    PetWindow.swift          transparent panel + mouse handling
+    Render/SceneRenderer     draws a PetScene: shadow, transforms, effects, speech bubble
+    Render/Skins/*.swift     one file per character; Quadruped.swift is the shared four-legged rig
+    KnockSound.swift         synthesized knock per character (knuckle / paw / metal)
+    Integrations.swift       install/remove agent hooks; open-at-login LaunchAgent
+    Settings/                SwiftUI settings window with live previews
+    StatusMenu.swift         menu-bar menu
+scripts/notify.sh            the hook script (installed to ~/.claude-buddy/)
+```
+
+Flow: agent hook → `notify.sh` drops `~/.claude-buddy/inbox/*.evt` → `Coordinator` polls →
+`AgentAdapters` → `AttentionQueue` → `PetController.knock()` / `goHome()`.
+Every frame: `Brain` decides the activity → `Animator` builds a `PetScene` → a `Skin` draws it.
+
+### Extending
+
+- **New character:** add a case to `SkinID` (+ name in `L10n`), write `Render/Skins/XSkin.swift`
+  implementing `Skin` (draw a `Pose` in the 200×300 character space) — or `QuadrupedSkin` for a four-legged
+  animal (just colors, tail shapes, markings and a head) — and register it in `SkinCatalog`.
+- **New behavior:** add an `Activity` case, give it weight/duration in `Brain`, a pose in `Animator.apply`.
+- **New agent:** usually nothing — use `notify.sh <name> <event>`. For a custom payload format, write an
+  `AgentAdapter` and add it to `AgentAdapters.known`. For one-click setup, add a case to `AgentIntegration`.
+- **New strings:** add an `L10nKey` with both languages (a test fails if one is missing).
+
+## Debugging
+
+```bash
+.build/release/ClaudeBuddy --snapshot sheet.png fa   # every character × every pose, as a PNG
+BUDDY_DEBUG=1 .build/release/ClaudeBuddy             # logs frame-rate / activity changes
+```
+
+The frame rate follows what's on screen: 8 fps asleep, 12 sitting, 30 moving, 60 while knocking or carried.
